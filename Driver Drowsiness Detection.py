@@ -15,7 +15,6 @@ from MAR import mouth_aspect_ratio
 from HeadPose import getHeadTiltAndCoords
 from Preprocess import preprocess
 
-
 # dlib의 얼굴 감지기 및 랜드마크 예측기 초기화
 print("[INFO] loading facial landmark predictor...")
 detector = dlib.get_frontal_face_detector()
