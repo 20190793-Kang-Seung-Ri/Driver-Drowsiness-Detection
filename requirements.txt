@@ -1,0 +1,17 @@
+numpy
+pandas
+matplotlib
+lxml
+seaborn
+statsmodels
+scipy
+patsy
+scikit-learn
+beautifulsoup4
+streamlit
+selenium
+imutils
+opencv-contrib-python
+opencv-python
+dlib
+cmake
