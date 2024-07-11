@@ -17,9 +17,16 @@ def histogram_equalization(frame):
 
     return equalized
 
-def brightness_correction(frame):
+def brightness_correction_up(frame):
     # 밝기 보정
     brightness_factor = 1.2  # 밝기를 조절할 상수 (1.0보다 크면 밝아지고, 작으면 어두워짐)
+    brightened_image = cv2.convertScaleAbs(frame, alpha=brightness_factor, beta=0)
+
+    return brightened_image
+
+def brightness_correction_down(frame):
+    # 밝기 보정
+    brightness_factor = 0.8  # 밝기를 조절할 상수 (1.0보다 크면 밝아지고, 작으면 어두워짐)
     brightened_image = cv2.convertScaleAbs(frame, alpha=brightness_factor, beta=0)
 
     return brightened_image
@@ -29,12 +36,11 @@ def preprocess(frame):
     # 예시: 색상 보정, 적응적 임계값 처리, 히스토그램 균일화 등
 
     # 프레임 전처리
-    # preprocessed_frame_1 = histogram_equalization(frame)
-    # preprocessed_frame_2 = adaptive_thresholding(preprocessed_frame_1)
-    preprocessed_frame_3 = brightness_correction(frame)
+    preprocessed_histogram_equalization = histogram_equalization(frame)
+    preprocessed_brightness_correction_down = brightness_correction_down(preprocessed_histogram_equalization)
 
     # 색상 변환 (BGR에서 RGB로)
-    frame_rgb = cv2.cvtColor(preprocessed_frame_3, cv2.COLOR_BGR2RGB)
+    frame_rgb = cv2.cvtColor(preprocessed_brightness_correction_down, cv2.COLOR_BGR2RGB)
     
     # 전처리된 이미지 반환
     return frame_rgb
