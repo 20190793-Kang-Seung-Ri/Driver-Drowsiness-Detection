@@ -12,8 +12,9 @@ import cv2
 import numpy as np
 from EAR import eye_aspect_ratio
 from MAR import mouth_aspect_ratio
-from HeadPose import getHeadTiltAndCoords
+# from HeadPose import getHeadTiltAndCoords
 from Preprocess import preprocess
+from HeadPoseSelf import getHeadTiltAndCoords
 
 # dlib의 얼굴 감지기 및 랜드마크 예측기 초기화
 print("[INFO] loading facial landmark predictor...")
@@ -49,7 +50,7 @@ image_points = np.array([
 # EAR, MAR 임계값 및 카운터 초기화
 EYE_AR_THRESH_Close = 0.17
 EYE_AR_THRESH_Drowsy = 0.30
-MOUTH_AR_THRESH = 0.79
+MOUTH_AR_THRESH = 0.88
 EYE_AR_CONSEC_FRAMES = 3
 COUNTER = 0
 
@@ -113,7 +114,7 @@ while True:
                 eye_closed_start_time = time.time()
             else:
                 eye_closed_duration = time.time() - eye_closed_start_time
-                if eye_closed_duration >= 1.5:
+                if eye_closed_duration >= 1.0:
                     cv2.putText(frame, "Drowsiness Driving", (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         elif ear >= EYE_AR_THRESH_Close and ear < EYE_AR_THRESH_Drowsy:
             COUNTER += 1
@@ -179,10 +180,13 @@ while True:
         # 고개 기울기 계산 및 표시
         (head_tilt_degree, start_point, end_point, end_point_alt) = getHeadTiltAndCoords(size, image_points, frame_height)
         cv2.line(gray, start_point, end_point, (255, 0, 0), 2)
-        cv2.line(gray, start_point, end_point_alt, (0, 0, 255), 2)
+        # cv2.line(gray, start_point, end_point_alt, (0, 0, 255), 2)
         if head_tilt_degree:
-            cv2.putText(frame, 'Head Tilt Degree: ' + str(head_tilt_degree[0]), (10, 50), 
+            cv2.putText(frame, 'Head Tilt Degree : ' + str(head_tilt_degree), (10, 50), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        
+        if head_tilt_degree < (90 - 25) or head_tilt_degree > (90 + 25):
+            cv2.putText(frame, "Drowsiness Driving", (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     # 프레임을 화면에 표시
     cv2.imshow("Frame", frame)

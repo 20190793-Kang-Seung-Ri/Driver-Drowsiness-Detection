@@ -36,8 +36,8 @@ def preprocess(frame):
     # 예시: 색상 보정, 적응적 임계값 처리, 히스토그램 균일화 등
 
     # 프레임 전처리
-    preprocessed_histogram_equalization = histogram_equalization(frame)
-    preprocessed_brightness_correction_down = brightness_correction_down(preprocessed_histogram_equalization)
+    # preprocessed_histogram_equalization = histogram_equalization(frame)
+    preprocessed_brightness_correction_down = brightness_correction_up(frame)
 
     # 색상 변환 (BGR에서 RGB로)
     frame_rgb = cv2.cvtColor(preprocessed_brightness_correction_down, cv2.COLOR_BGR2RGB)
