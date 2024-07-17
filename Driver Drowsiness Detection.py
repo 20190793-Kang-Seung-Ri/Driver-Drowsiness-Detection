@@ -10,6 +10,7 @@ import dlib
 import math
 import cv2
 import numpy as np
+import time
 from EAR import eye_aspect_ratio
 from MAR import mouth_aspect_ratio
 # from HeadPose import getHeadTiltAndCoords
@@ -24,7 +25,6 @@ predictor = dlib.shape_predictor('./dlib_shape_predictor/shape_predictor_68_face
 # 비디오 스트림 초기화 및 카메라 센서 워밍업
 print("[INFO] initializing camera...")
 vs = VideoStream(src=0).start()
-# vs = VideoStream(usePiCamera=True).start() # Raspberry Pi 사용 시
 time.sleep(2.0)
 
 # 프레임 크기 설정
@@ -50,12 +50,16 @@ image_points = np.array([
 # EAR, MAR 임계값 및 카운터 초기화
 EYE_AR_THRESH_Close = 0.17
 EYE_AR_THRESH_Drowsy = 0.30
-MOUTH_AR_THRESH = 0.88
+MOUTH_AR_THRESH = 0.84
 EYE_AR_CONSEC_FRAMES = 3
 COUNTER = 0
 
-# 눈 감기 시작 시간 초기화
-eye_closed_start_time = None
+# 하품 타임스탬프와 카운트를 위한 변수
+yawn_count = 0
+
+# 하품 감지 타임프레임 (60초)
+time_frame = 10  # 1분
+current_time = time.time()
 
 # 비디오 스트림에서 프레임을 반복적으로 읽어들임
 while True:
@@ -115,7 +119,7 @@ while True:
             else:
                 eye_closed_duration = time.time() - eye_closed_start_time
                 if eye_closed_duration >= 1.0:
-                    cv2.putText(frame, "Drowsiness Driving", (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                    cv2.putText(frame, "sound alarm!", (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         elif ear >= EYE_AR_THRESH_Close and ear < EYE_AR_THRESH_Drowsy:
             COUNTER += 1
             if COUNTER >= EYE_AR_CONSEC_FRAMES:
@@ -138,6 +142,25 @@ while True:
         # 하품 상태 감지
         if mar > MOUTH_AR_THRESH:
             cv2.putText(frame, "Yawning!", (10, 170), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+            # 현재 시간 계산
+            current_time = time.time()
+
+            # 하품을 감지한 경우
+            yawn_count += 1
+
+        # 마지막 하품 초기화 시간
+        last_reset_time = time.time()
+
+        # 1분이 지났으면 카운트와 타임스탬프 초기화
+        if last_reset_time - current_time >= time_frame:
+            yawn_count = 0
+
+        # 하품한 프레임 수가 30개 이상이면 메시지 알람
+        if yawn_count >= 30:
+            cv2.putText(frame, "massage alarm!", (10, 230), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
 
         # 얼굴 랜드마크 포인트 그리기 및 주요 랜드마크 업데이트
         for (i, (x, y)) in enumerate(shape):
@@ -186,7 +209,7 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         
         if head_tilt_degree < (90 - 25) or head_tilt_degree > (90 + 25):
-            cv2.putText(frame, "Drowsiness Driving", (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            cv2.putText(frame, "sound alarm!", (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     # 프레임을 화면에 표시
     cv2.imshow("Frame", frame)
